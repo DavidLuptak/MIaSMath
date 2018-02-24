@@ -18,9 +18,16 @@ package cz.muni.fi.mias;
 import cz.muni.fi.mias.math.MathTokenizer;
 import java.io.Reader;
 import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.index.IndexSettings;
+import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 
 /**
  * Factory used for calling MathTokenizer from SOLR environment. The following
@@ -46,19 +53,39 @@ import org.apache.lucene.util.AttributeFactory;
  *
  * @author Martin Liska
  */
-public class MathTokenizerFactory extends TokenizerFactory {
+public class MathTokenizerFactory extends AbstractTokenizerFactory {
+
+    private static final Logger LOG = LogManager.getLogger(MathTokenizerFactory.class);
 
     private final boolean subformulae;
 
-    public MathTokenizerFactory(Map<String, String> args) {
-        super(args);
-        String subforms = args.get("subformulae");
-        subformulae = Boolean.parseBoolean(subforms);
+// Lucene leftover
+//    public MathTokenizerFactory(Map<String, String> args) {
+//        super(args);
+//        String subforms = args.get("subformulae");
+//        subformulae = Boolean.parseBoolean(subforms);
+//    }
+
+    // ES constructor
+    public MathTokenizerFactory(IndexSettings indexSettings, String name, Settings settings) {
+        super(indexSettings, name, settings);
+        this.subformulae = true;
     }
 
-    @Override
+    // Lucene leftover
+    // @Override
     public Tokenizer create(AttributeFactory af, Reader reader) {
+        LOG.info("Original Lucene Tokenizer create method called.");
         return new MathTokenizer(reader, subformulae, MathTokenizer.MathMLType.BOTH);
     }
 
+    // ES purposes
+    public static MathTokenizerFactory getMathTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings) {
+        return new MathTokenizerFactory(indexSettings, name, settings);
+    }
+
+    @Override
+    public Tokenizer create() {
+        return new MathTokenizer();
+    }
 }

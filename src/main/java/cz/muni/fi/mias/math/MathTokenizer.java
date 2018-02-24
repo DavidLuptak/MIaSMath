@@ -141,6 +141,14 @@ public class MathTokenizer extends Tokenizer {
 
     private static final boolean[] trueFalseCollection = {true, false};
 
+    // ES plugin purposes
+    // fill with some default values
+    public MathTokenizer() {
+        this.mmlType = MathMLType.BOTH;
+        this.subformulae = true;
+        this.reduceWeighting = true;
+    }
+
     public enum MathMLType {
 
         CONTENT, PRESENTATION, BOTH
@@ -171,7 +179,8 @@ public class MathTokenizer extends Tokenizer {
      * subformulae etc.)
      */
     public MathTokenizer(Reader input, boolean subformulae, MathMLType type, boolean reduceWeighting) {
-        super(input);
+        super();
+        this.setReader(input);
 
         this.mmlType = type;
         this.subformulae = subformulae;
